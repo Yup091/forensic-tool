@@ -8,6 +8,7 @@
 #include "erasure_manager.hpp"
 #include "verifier.hpp"
 #include "audit_logger.hpp"
+#include "report_generator.hpp"
 
 class Menu {
 public:
@@ -34,6 +35,7 @@ private:
     ErasureManager erasureManager;
     Verifier verifier;
     AuditLogger auditLogger;
+    ReportGenerator reportGenerator;
     Device selectedDevice;
 };
 

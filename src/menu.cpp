@@ -2,8 +2,11 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <filesystem>
 
-Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager(), verifier(), auditLogger() {}
+namespace fs = std::filesystem;
+
+Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager(), verifier(), auditLogger(), reportGenerator() {}
 
 void Menu::run() {
     while (running) {
@@ -139,7 +142,6 @@ void Menu::option2_RecoverFiles() {
             std::cout << "[*] Files Recovered: " << result.filesRecovered << "\n";
             std::cout << "[*] Status: " << result.details << "\n\n";
             
-            // Log the operation
             AuditRecord record = auditLogger.logRecovery(selectedDevice, result);
             auditLogger.saveAuditRecord(record);
             
@@ -158,7 +160,6 @@ void Menu::option2_RecoverFiles() {
             std::cout << "\n[*] Recovery Method: " << result.method << "\n";
             std::cout << "[*] Status: " << result.details << "\n\n";
             
-            // Log the operation
             AuditRecord record = auditLogger.logRecovery(selectedDevice, result);
             auditLogger.saveAuditRecord(record);
             
@@ -226,7 +227,6 @@ void Menu::option3_SecureErase() {
     std::cout << "[*] Status: " << (result.success ? "SUCCESS" : "FAILED") << "\n";
     std::cout << "[*] Details: " << result.details << "\n\n";
     
-    // Log the operation
     AuditRecord record = auditLogger.logErasure(selectedDevice, result);
     auditLogger.saveAuditRecord(record);
     
@@ -255,7 +255,6 @@ void Menu::option4_VerifyErasure() {
     std::cout << "    Method: " << result.method << "\n";
     std::cout << "    Details: " << result.details << "\n\n";
     
-    // Log the operation
     AuditRecord record = auditLogger.logVerification(selectedDevice, result);
     auditLogger.saveAuditRecord(record);
     
@@ -266,15 +265,124 @@ void Menu::option4_VerifyErasure() {
 }
 
 void Menu::option5_GenerateReport() {
-    std::cout << "\n[*] 5. Generate Audit Report\n";
-    std::cout << "    Not implemented yet.\n\n";
+    std::cout << "\n╔═════════════════════════════════════╘\n";
+    std::cout << "║  5. GENERATE AUDIT REPORT            ║\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
+    
+    auto caseIDs = auditLogger.getAllCaseIDs();
+    
+    if (caseIDs.empty()) {
+        std::cout << "\n[!] No audit records found.\n\n";
+        std::cout << "Press Enter to continue...";
+        std::cin.ignore();
+        return;
+    }
+    
+    std::cout << "\n[*] Available cases:\n";
+    for (size_t i = 0; i < caseIDs.size(); ++i) {
+        std::cout << "    " << (i + 1) << ". " << caseIDs[i] << "\n";
+    }
+    
+    std::cout << "\n[*] Report options:\n";
+    std::cout << "    1. Generate text report for specific case\n";
+    std::cout << "    2. Generate HTML report for specific case\n";
+    std::cout << "    3. Generate audit summary\n";
+    std::cout << "    4. Generate chain of custody report\n";
+    std::cout << "    0. Cancel\n\n";
+    
+    std::cout << "Select option: ";
+    int option = -1;
+    std::cin >> option;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    
+    switch (option) {
+        case 1: {
+            std::cout << "\nEnter case number (1-" << caseIDs.size() << "): ";
+            int caseNum = 0;
+            std::cin >> caseNum;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            
+            if (caseNum >= 1 && caseNum <= static_cast<int>(caseIDs.size())) {
+                AuditRecord record = auditLogger.loadAuditRecord(caseIDs[caseNum - 1]);
+                if (!record.caseID.empty()) {
+                    reportGenerator.generateTextReport(record);
+                    std::cout << "\n[✓] Report generated successfully.\n\n";
+                }
+            }
+            break;
+        }
+        case 2: {
+            std::cout << "\nEnter case number (1-" << caseIDs.size() << "): ";
+            int caseNum = 0;
+            std::cin >> caseNum;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            
+            if (caseNum >= 1 && caseNum <= static_cast<int>(caseIDs.size())) {
+                AuditRecord record = auditLogger.loadAuditRecord(caseIDs[caseNum - 1]);
+                if (!record.caseID.empty()) {
+                    reportGenerator.generateHTMLReport(record);
+                    std::cout << "\n[✓] Report generated successfully.\n\n";
+                }
+            }
+            break;
+        }
+        case 3: {
+            reportGenerator.generateAuditSummary(caseIDs);
+            std::cout << "\n[✓] Audit summary generated successfully.\n\n";
+            break;
+        }
+        case 4: {
+            std::cout << "\nEnter case number (1-" << caseIDs.size() << "): ";
+            int caseNum = 0;
+            std::cin >> caseNum;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            
+            if (caseNum >= 1 && caseNum <= static_cast<int>(caseIDs.size())) {
+                reportGenerator.generateChainOfCustodyReport(caseIDs[caseNum - 1]);
+                std::cout << "\n[✓] Chain of custody report generated successfully.\n\n";
+            }
+            break;
+        }
+        case 0:
+            std::cout << "\n[*] Cancelled.\n\n";
+            break;
+        default:
+            std::cout << "\n[!] Invalid selection.\n\n";
+    }
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }
 
 void Menu::option6_ViewReports() {
-    std::cout << "\n[*] 6. View Previous Reports\n";
-    std::cout << "    Not implemented yet.\n\n";
+    std::cout << "\n╔═════════════════════════════════════╘\n";
+    std::cout << "║  6. VIEW PREVIOUS REPORTS            ║\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
+    
+    std::cout << "\n[*] Listing reports in 'reports/' directory...\n\n";
+    
+    try {
+        if (fs::exists("reports")) {
+            int count = 0;
+            for (const auto& entry : fs::directory_iterator("reports")) {
+                if (entry.is_regular_file()) {
+                    std::cout << "    " << entry.path().filename() << "\n";
+                    count++;
+                }
+            }
+            
+            if (count == 0) {
+                std::cout << "[*] No reports found.\n\n";
+            } else {
+                std::cout << "\n[✓] Total reports: " << count << "\n\n";
+            }
+        } else {
+            std::cout << "[*] Reports directory does not exist.\n\n";
+        }
+    } catch (const std::exception& e) {
+        std::cout << "[!] Error reading reports: " << e.what() << "\n\n";
+    }
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }
