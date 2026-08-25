@@ -7,6 +7,7 @@
 #include "recovery_manager.hpp"
 #include "erasure_manager.hpp"
 #include "verifier.hpp"
+#include "audit_logger.hpp"
 
 class Menu {
 public:
@@ -32,6 +33,7 @@ private:
     RecoveryManager recoveryManager;
     ErasureManager erasureManager;
     Verifier verifier;
+    AuditLogger auditLogger;
     Device selectedDevice;
 };
 

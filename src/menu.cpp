@@ -3,7 +3,7 @@
 #include <string>
 #include <limits>
 
-Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager(), verifier() {}
+Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager(), verifier(), auditLogger() {}
 
 void Menu::run() {
     while (running) {
@@ -138,6 +138,12 @@ void Menu::option2_RecoverFiles() {
             std::cout << "\n[*] Recovery Method: " << result.method << "\n";
             std::cout << "[*] Files Recovered: " << result.filesRecovered << "\n";
             std::cout << "[*] Status: " << result.details << "\n\n";
+            
+            // Log the operation
+            AuditRecord record = auditLogger.logRecovery(selectedDevice, result);
+            auditLogger.saveAuditRecord(record);
+            
+            std::cout << "[*] Case ID: " << record.caseID << "\n\n";
             break;
         }
         case 2: {
@@ -151,6 +157,12 @@ void Menu::option2_RecoverFiles() {
             RecoveryResult result = recoveryManager.recoverWithTestDisk(selectedDevice, outputDir);
             std::cout << "\n[*] Recovery Method: " << result.method << "\n";
             std::cout << "[*] Status: " << result.details << "\n\n";
+            
+            // Log the operation
+            AuditRecord record = auditLogger.logRecovery(selectedDevice, result);
+            auditLogger.saveAuditRecord(record);
+            
+            std::cout << "[*] Case ID: " << record.caseID << "\n\n";
             break;
         }
         case 0:
@@ -214,6 +226,12 @@ void Menu::option3_SecureErase() {
     std::cout << "[*] Status: " << (result.success ? "SUCCESS" : "FAILED") << "\n";
     std::cout << "[*] Details: " << result.details << "\n\n";
     
+    // Log the operation
+    AuditRecord record = auditLogger.logErasure(selectedDevice, result);
+    auditLogger.saveAuditRecord(record);
+    
+    std::cout << "[*] Case ID: " << record.caseID << "\n\n";
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }
@@ -236,6 +254,12 @@ void Menu::option4_VerifyErasure() {
     std::cout << "    Status: " << result.statusString << "\n";
     std::cout << "    Method: " << result.method << "\n";
     std::cout << "    Details: " << result.details << "\n\n";
+    
+    // Log the operation
+    AuditRecord record = auditLogger.logVerification(selectedDevice, result);
+    auditLogger.saveAuditRecord(record);
+    
+    std::cout << "[*] Case ID: " << record.caseID << "\n\n";
     
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
