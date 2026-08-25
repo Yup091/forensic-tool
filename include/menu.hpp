@@ -5,6 +5,7 @@
 #include <string>
 #include "device_manager.hpp"
 #include "recovery_manager.hpp"
+#include "erasure_manager.hpp"
 
 class Menu {
 public:
@@ -28,6 +29,7 @@ private:
     bool running;
     DeviceManager deviceManager;
     RecoveryManager recoveryManager;
+    ErasureManager erasureManager;
     Device selectedDevice;
 };
 

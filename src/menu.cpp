@@ -3,7 +3,7 @@
 #include <string>
 #include <limits>
 
-Menu::Menu() : running(true), deviceManager(), recoveryManager() {}
+Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager() {}
 
 void Menu::run() {
     while (running) {
@@ -167,8 +167,55 @@ void Menu::option2_RecoverFiles() {
 }
 
 void Menu::option3_SecureErase() {
-    std::cout << "\n[*] 3. Securely Erase Device\n";
-    std::cout << "    Not implemented yet.\n\n";
+    std::cout << "\n╔═════════════════════════════════════╘\n";
+    std::cout << "║  3. SECURELY ERASE DEVICE            ║\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
+    
+    if (selectedDevice.path.empty()) {
+        std::cout << "\n[!] No device selected. Please run Option 1 first.\n\n";
+        std::cout << "Press Enter to continue...";
+        std::cin.ignore();
+        return;
+    }
+    
+    erasureManager.displayErasureMethods();
+    
+    std::cout << "Select method: ";
+    int method = -1;
+    std::cin >> method;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    
+    ErasureResult result;
+    
+    switch (method) {
+        case 1: {
+            result = erasureManager.eraseWithShred(selectedDevice, 1);
+            break;
+        }
+        case 2: {
+            result = erasureManager.eraseWithNwipe(selectedDevice, "dod5220");
+            break;
+        }
+        case 3: {
+            result = erasureManager.eraseWithDD(selectedDevice);
+            break;
+        }
+        case 0:
+            std::cout << "\n[*] Cancelled.\n\n";
+            std::cout << "Press Enter to continue...";
+            std::cin.ignore();
+            return;
+        default:
+            std::cout << "\n[!] Invalid selection.\n\n";
+            std::cout << "Press Enter to continue...";
+            std::cin.ignore();
+            return;
+    }
+    
+    std::cout << "[*] Erasure Method: " << result.method << "\n";
+    std::cout << "[*] Status: " << (result.success ? "SUCCESS" : "FAILED") << "\n";
+    std::cout << "[*] Details: " << result.details << "\n\n";
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }
