@@ -3,7 +3,7 @@
 #include <string>
 #include <limits>
 
-Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager() {}
+Menu::Menu() : running(true), deviceManager(), recoveryManager(), erasureManager(), verifier() {}
 
 void Menu::run() {
     while (running) {
@@ -42,12 +42,10 @@ int Menu::getUserChoice() {
     std::cout << "Select: ";
     
     if (std::cin >> choice) {
-        // Clear the input buffer
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return choice;
     }
     
-    // Clear the input buffer if invalid input
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return -1;
@@ -221,8 +219,24 @@ void Menu::option3_SecureErase() {
 }
 
 void Menu::option4_VerifyErasure() {
-    std::cout << "\n[*] 4. Verify Erasure\n";
-    std::cout << "    Not implemented yet.\n\n";
+    std::cout << "\n╔═════════════════════════════════════╘\n";
+    std::cout << "║  4. VERIFY ERASURE                   ║\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
+    
+    if (selectedDevice.path.empty()) {
+        std::cout << "\n[!] No device selected. Please run Option 1 first.\n\n";
+        std::cout << "Press Enter to continue...";
+        std::cin.ignore();
+        return;
+    }
+    
+    VerificationResult result = verifier.verifyErasure(selectedDevice);
+    
+    std::cout << "[*] Verification Summary:\n";
+    std::cout << "    Status: " << result.statusString << "\n";
+    std::cout << "    Method: " << result.method << "\n";
+    std::cout << "    Details: " << result.details << "\n\n";
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }

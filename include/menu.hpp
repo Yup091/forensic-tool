@@ -6,6 +6,7 @@
 #include "device_manager.hpp"
 #include "recovery_manager.hpp"
 #include "erasure_manager.hpp"
+#include "verifier.hpp"
 
 class Menu {
 public:
@@ -30,6 +31,7 @@ private:
     DeviceManager deviceManager;
     RecoveryManager recoveryManager;
     ErasureManager erasureManager;
+    Verifier verifier;
     Device selectedDevice;
 };
 
