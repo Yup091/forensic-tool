@@ -1,6 +1,14 @@
+#include "menu.hpp"
 #include <iostream>
 
 int main() {
-    std::cout << "FORENSIC DATA TOOL" << std::endl;
+    try {
+        Menu menu;
+        menu.run();
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] " << e.what() << std::endl;
+        return 1;
+    }
+    
     return 0;
 }
