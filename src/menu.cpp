@@ -3,7 +3,7 @@
 #include <string>
 #include <limits>
 
-Menu::Menu() : running(true), deviceManager() {}
+Menu::Menu() : running(true), deviceManager(), recoveryManager() {}
 
 void Menu::run() {
     while (running) {
@@ -16,16 +16,16 @@ void Menu::run() {
 
 void Menu::displayHeader() {
     std::cout << "\n";
-    std::cout << "╔══════════════════════════════════════╗\n";
+    std::cout << "╔═════════════════════════════════════╘\n";
     std::cout << "║       FORENSIC DATA TOOL             ║\n";
-    std::cout << "╚══════════════════════════════════════╝\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
     std::cout << "\n";
 }
 
 void Menu::displayMenu() {
-    std::cout << "╔══════════════════════════════════════╗\n";
+    std::cout << "╔═════════════════════════════════════╘\n";
     std::cout << "║           MAIN MENU                  ║\n";
-    std::cout << "╠══════════════════════════════════════╣\n";
+    std::cout << "╠═════════════════════════════════════╣\n";
     std::cout << "║ 1. Identify Device                   ║\n";
     std::cout << "║ 2. Recover Deleted Files             ║\n";
     std::cout << "║ 3. Securely Erase Device             ║\n";
@@ -33,7 +33,7 @@ void Menu::displayMenu() {
     std::cout << "║ 5. Generate Audit Report             ║\n";
     std::cout << "║ 6. View Previous Reports             ║\n";
     std::cout << "║ 7. Exit                              ║\n";
-    std::cout << "╚══════════════════════════════════════╝\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
     std::cout << "\n";
 }
 
@@ -84,9 +84,9 @@ void Menu::handleChoice(int choice) {
 }
 
 void Menu::option1_IdentifyDevice() {
-    std::cout << "\n╔══════════════════════════════════════╗\n";
+    std::cout << "\n╔═════════════════════════════════════╘\n";
     std::cout << "║  1. IDENTIFY DEVICE                  ║\n";
-    std::cout << "╚══════════════════════════════════════╝\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
     
     auto devices = deviceManager.discoverDevices();
     
@@ -111,8 +111,57 @@ void Menu::option1_IdentifyDevice() {
 }
 
 void Menu::option2_RecoverFiles() {
-    std::cout << "\n[*] 2. Recover Deleted Files\n";
-    std::cout << "    Not implemented yet.\n\n";
+    std::cout << "\n╔═════════════════════════════════════╘\n";
+    std::cout << "║  2. RECOVER DELETED FILES            ║\n";
+    std::cout << "╚═════════════════════════════════════╝\n";
+    
+    std::cout << "\n[*] Available recovery methods:\n";
+    std::cout << "    1. PhotoRec (File carving - finds deleted files)\n";
+    std::cout << "    2. TestDisk (Partition/filesystem recovery)\n";
+    std::cout << "    0. Cancel\n\n";
+    
+    std::cout << "Select method: ";
+    int method = -1;
+    std::cin >> method;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    
+    std::string outputDir = "recovery/";
+    
+    switch (method) {
+        case 1: {
+            if (selectedDevice.path.empty()) {
+                std::cout << "\n[!] No device selected. Please run Option 1 first.\n\n";
+                std::cout << "Press Enter to continue...";
+                std::cin.ignore();
+                return;
+            }
+            
+            RecoveryResult result = recoveryManager.recoverWithPhotoRec(selectedDevice, outputDir);
+            std::cout << "\n[*] Recovery Method: " << result.method << "\n";
+            std::cout << "[*] Files Recovered: " << result.filesRecovered << "\n";
+            std::cout << "[*] Status: " << result.details << "\n\n";
+            break;
+        }
+        case 2: {
+            if (selectedDevice.path.empty()) {
+                std::cout << "\n[!] No device selected. Please run Option 1 first.\n\n";
+                std::cout << "Press Enter to continue...";
+                std::cin.ignore();
+                return;
+            }
+            
+            RecoveryResult result = recoveryManager.recoverWithTestDisk(selectedDevice, outputDir);
+            std::cout << "\n[*] Recovery Method: " << result.method << "\n";
+            std::cout << "[*] Status: " << result.details << "\n\n";
+            break;
+        }
+        case 0:
+            std::cout << "\n[*] Cancelled.\n\n";
+            break;
+        default:
+            std::cout << "\n[!] Invalid selection.\n\n";
+    }
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }
