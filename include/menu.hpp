@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include "device_manager.hpp"
 
 class Menu {
 public:
@@ -24,6 +25,8 @@ private:
     void option7_Exit();
     
     bool running;
+    DeviceManager deviceManager;
+    Device selectedDevice;
 };
 
 #endif // MENU_HPP

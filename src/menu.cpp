@@ -3,7 +3,7 @@
 #include <string>
 #include <limits>
 
-Menu::Menu() : running(true) {}
+Menu::Menu() : running(true), deviceManager() {}
 
 void Menu::run() {
     while (running) {
@@ -84,8 +84,28 @@ void Menu::handleChoice(int choice) {
 }
 
 void Menu::option1_IdentifyDevice() {
-    std::cout << "\n[*] 1. Identify Device\n";
-    std::cout << "    Not implemented yet.\n\n";
+    std::cout << "\n╔══════════════════════════════════════╗\n";
+    std::cout << "║  1. IDENTIFY DEVICE                  ║\n";
+    std::cout << "╚══════════════════════════════════════╝\n";
+    
+    auto devices = deviceManager.discoverDevices();
+    
+    if (devices.empty()) {
+        std::cout << "[!] No devices found or insufficient privileges.\n";
+        std::cout << "[*] Try running with: sudo ./forensic-tool\n\n";
+    } else {
+        selectedDevice = deviceManager.selectDevice(devices);
+        
+        if (!selectedDevice.path.empty()) {
+            std::cout << "\n[✓] Device Details:\n";
+            std::cout << "    Path: " << selectedDevice.path << "\n";
+            std::cout << "    Model: " << selectedDevice.model << "\n";
+            std::cout << "    Size: " << selectedDevice.size << "\n";
+            std::cout << "    Type: " << selectedDevice.type << "\n";
+            std::cout << "    Filesystem: " << selectedDevice.fstype << "\n\n";
+        }
+    }
+    
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
 }
