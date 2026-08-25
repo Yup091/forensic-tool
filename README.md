@@ -16,17 +16,8 @@ forensic-tool/
 ├── build/            # Build artifacts (generated)
 ├── Makefile          # Build configuration
 └── README.md         # This file
-```
 
-## Phase 1: Milestone 1
-
-- [x] Create repository
-- [x] Create C++ project structure
-- [x] Makefile setup
-- [x] main.cpp with basic output
-- [x] Compile successfully
-
-## Building
+## build
 
 ```bash
 make       # Build the project
